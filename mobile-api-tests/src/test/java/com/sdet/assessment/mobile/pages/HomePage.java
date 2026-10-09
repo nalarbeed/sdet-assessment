@@ -17,11 +17,9 @@ public class HomePage extends BasePage {
     private static final String PKG = "io.selendroid.testapp";
 
     private static final By TITLE = By.id("android:id/title");
-    private static final By HEADING = By.xpath("//android.widget.TextView[@text='Hello Default Locale, Selendroid-test-app!']");
     private static final By EN_BUTTON = By.id(PKG + ":id/buttonTest");
     private static final By START_WEBVIEW = By.id(PKG + ":id/buttonStartWebview");
     private static final By START_REGISTRATION = By.id(PKG + ":id/startUserRegistration");
-    private static final By TEXT_FIELD = By.id(PKG + ":id/my_text_field");
     private static final By WAITING_BUTTON = By.id(PKG + ":id/waitingButtonTest");
     private static final By PROGRESS = By.id("android:id/progress");
     private static final By ACCEPT_ADDS = By.id(PKG + ":id/input_adds_check_box");
@@ -30,15 +28,12 @@ public class HomePage extends BasePage {
     private static final By POPUP_BUTTON = By.id(PKG + ":id/showPopupWindowButton");
     private static final By EXCEPTION_BUTTON = By.id(PKG + ":id/exceptionTestButton");
     private static final By EXCEPTION_FIELD = By.id(PKG + ":id/exceptionTestField");
-    private static final By ENCODING_TEXT = By.id(PKG + ":id/encodingTextview");
     private static final By TOP_LEVEL_ELEMENT = By.id(PKG + ":id/topLevelElementTest");
 
     private final Map<String, By> elements = new LinkedHashMap<>();
 
     public HomePage(AndroidDriver driver) {
         super(driver);
-        elements.put("selendroid-test-app", TITLE);
-        elements.put("Hello Default Locale, Selendroid-test-app!", HEADING);
         elements.put("EN Button", EN_BUTTON);
         elements.put("Show Progress Bar for a while", WAITING_BUTTON);
         elements.put("I accept adds", ACCEPT_ADDS);
@@ -47,11 +42,6 @@ public class HomePage extends BasePage {
         elements.put("Display Popup Window", POPUP_BUTTON);
         elements.put("Press to throw unhandled exception", EXCEPTION_BUTTON);
         elements.put("Display and focus on layout", TOP_LEVEL_ELEMENT);
-        elements.put("buttonStartWebview", START_WEBVIEW);
-        elements.put("startUserRegistration", START_REGISTRATION);
-        elements.put("my_text_field", TEXT_FIELD);
-        elements.put("exceptionTestField", EXCEPTION_FIELD);
-        elements.put("encodingTextview", ENCODING_TEXT);
     }
 
     public boolean isLoaded() {
@@ -63,27 +53,17 @@ public class HomePage extends BasePage {
     }
 
     public boolean isElementDisplayed(String element) {
-        By by = elements.get(element);
-        if (by == null) {
-            throw new IllegalArgumentException("Unknown home element: " + element);
-        }
-        return isDisplayed(by, 3);
+        return isDisplayed(requireElement(element), 3);
     }
 
     public void tap(String element) {
-        By by = elements.get(element);
-        if (by == null) {
-            throw new IllegalArgumentException("Unknown home element: " + element);
-        }
-        click(by);
+        click(requireElement(element));
     }
 
-    /** The file-logo icon button (right-hand ImageButton) that opens registration. */
     public void tapFileLogo() {
         click(START_REGISTRATION);
     }
 
-    /** The Chrome-logo icon button (left-hand ImageButton) that opens the WebView demo. */
     public void tapChromeLogo() {
         click(START_WEBVIEW);
     }
@@ -95,8 +75,7 @@ public class HomePage extends BasePage {
             field.sendKeys(text);
         } catch (WebDriverException e) {
             // Expected in the S9 fail case: typing this text crashes the app and
-            // the field goes stale. The scenario's real assertion (home title)
-            // still runs and fails afterwards.
+            // the field goes stale; the home-title assertion still runs and fails.
         }
     }
 
@@ -105,8 +84,16 @@ public class HomePage extends BasePage {
             new WebDriverWait(driver, Duration.ofSeconds(5))
                     .until(ExpectedConditions.visibilityOfElementLocated(PROGRESS));
         } catch (TimeoutException e) {
-            // Loader may have already finished; fall through to invisibility wait.
+            // Loader may already have finished.
         }
         wait.until(ExpectedConditions.invisibilityOfElementLocated(PROGRESS));
+    }
+
+    private By requireElement(String element) {
+        By by = elements.get(element);
+        if (by == null) {
+            throw new IllegalArgumentException("Unknown home element: " + element);
+        }
+        return by;
     }
 }

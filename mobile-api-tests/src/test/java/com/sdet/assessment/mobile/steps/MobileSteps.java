@@ -250,8 +250,9 @@ public class MobileSteps {
 
     @Then("the web view shows text starting with {string}")
     public void theWebViewShowsTextStartingWith(String prefix) {
-        Assert.assertTrue(webView().bodyText().startsWith(prefix),
-                "Web view text does not start with: " + prefix + " (was: " + webView().bodyText() + ")");
+        String text = webView().bodyText();
+        Assert.assertTrue(text.startsWith(prefix),
+                "Web view text does not start with: " + prefix + " (was: " + text + ")");
     }
 
     @When("I enter the name {string} in the web view")

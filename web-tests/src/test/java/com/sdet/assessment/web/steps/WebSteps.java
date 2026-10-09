@@ -28,6 +28,8 @@ public class WebSteps {
 
     private static final Logger log = LoggerFactory.getLogger(WebSteps.class);
 
+    private static final int SORTABLE_ITEM_COUNT = 7;
+
     private Page page;
     private JQueryUiHomePage home;
     private DroppablePage droppablePage;
@@ -160,7 +162,8 @@ public class WebSteps {
     public void theSortableOrderIsReversed() {
         Assert.assertNotNull(previousOrder, "Original sortable order was not captured");
         Assert.assertFalse(previousOrder.isEmpty(), "Original sortable order is empty");
-        Assert.assertEquals(previousOrder.size(), 7, "Expected 7 sortable items before reversing");
+        Assert.assertEquals(previousOrder.size(), SORTABLE_ITEM_COUNT,
+                "Expected " + SORTABLE_ITEM_COUNT + " sortable items before reversing");
         List<String> expected = new ArrayList<>(previousOrder);
         Collections.reverse(expected);
         List<String> actual = sortablePage.items();

@@ -4,7 +4,6 @@ import com.sdet.assessment.mobile.config.ConfigReader;
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -51,9 +50,5 @@ public class BasePage {
         } catch (TimeoutException e) {
             return false;
         }
-    }
-
-    protected WebElement find(By by) {
-        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
     }
 }

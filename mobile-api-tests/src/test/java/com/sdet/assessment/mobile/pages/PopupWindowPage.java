@@ -16,10 +16,6 @@ public class PopupWindowPage extends BasePage {
         return isDisplayed(TITLE, 5);
     }
 
-    public String title() {
-        return getText(TITLE);
-    }
-
     public void dismiss() {
         click(DISMISS);
     }

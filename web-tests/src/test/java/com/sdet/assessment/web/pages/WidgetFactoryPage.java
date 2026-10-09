@@ -13,7 +13,7 @@ public class WidgetFactoryPage {
     }
 
     private FrameLocator frame() {
-        return page.frameLocator("iframe.demo-frame");
+        return page.frameLocator(Locators.DEMO_FRAME);
     }
 
     public void clickButton(String name) {

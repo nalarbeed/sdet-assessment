@@ -81,11 +81,7 @@ public class MobileHooks {
         driver.setSetting("limitXPathContextScope", false);
     }
 
-    /**
-     * Always start a scenario from a fresh home screen, even if the previous
-     * scenario crashed the app. Terminating first guarantees the launcher
-     * activity is (re)started rather than resuming a dead/odd activity.
-     */
+    // Terminate first so the launcher activity is (re)started even after a crash.
     private void restartApp(AndroidDriver driver) {
         try {
             driver.terminateApp(APP_PACKAGE);
@@ -121,7 +117,6 @@ public class MobileHooks {
             element.click();
             log.info("Dismissed {} dialog", what);
         } catch (TimeoutException ignored) {
-            // Dialog is not present; nothing to do.
         }
     }
 

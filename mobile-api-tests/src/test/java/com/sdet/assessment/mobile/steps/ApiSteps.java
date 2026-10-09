@@ -18,7 +18,6 @@ public class ApiSteps {
     private final UserClient userClient = new UserClient();
 
     private Response lastResponse;
-    private Map<String, String> requestBody;
 
     @Given("the ReqRes API is available")
     public void theReqResApiIsAvailable() {
@@ -43,7 +42,7 @@ public class ApiSteps {
 
     @When("I create a user from the first name of user with id {int} and the configured job")
     public void iCreateAUserFromUserWithId(int id) {
-        requestBody = new LinkedHashMap<>();
+        Map<String, String> requestBody = new LinkedHashMap<>();
         requestBody.put("name", first_nameOf(id));
         requestBody.put("job", ConfigReader.get("api.job"));
         lastResponse = userClient.createUser(requestBody);

@@ -22,6 +22,6 @@ public class JQueryUiHomePage {
         page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(linkText).setExact(true))
                 .first()
                 .click();
-        page.locator("iframe.demo-frame").waitFor();
+        page.locator(Locators.DEMO_FRAME).waitFor();
     }
 }

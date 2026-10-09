@@ -20,8 +20,8 @@ public class WebViewPage extends BasePage {
         super(driver);
     }
 
-    /** Wait (explicitly) for a WEBVIEW_ context to appear, then switch to it. */
     public void switchToWebView() {
+        // The WEBVIEW_ context only appears once the page has loaded.
         String context = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds))
                 .until(ignored -> findWebViewContext());
         driver.context(context);

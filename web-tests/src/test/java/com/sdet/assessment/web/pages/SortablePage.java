@@ -10,6 +10,8 @@ import java.util.List;
 
 public class SortablePage {
 
+    private static final String ITEM_PREFIX = "Item ";
+
     private final Page page;
 
     public SortablePage(Page page) {
@@ -17,7 +19,7 @@ public class SortablePage {
     }
 
     private FrameLocator frame() {
-        return page.frameLocator("iframe.demo-frame");
+        return page.frameLocator(Locators.DEMO_FRAME);
     }
 
     public List<String> items() {
@@ -31,11 +33,11 @@ public class SortablePage {
     public void reverse() {
         int count = items().size();
         Locator first = frame().locator("#sortable li")
-                .filter(new Locator.FilterOptions().setHasText("Item 1"))
+                .filter(new Locator.FilterOptions().setHasText(ITEM_PREFIX + "1"))
                 .first();
         for (int n = count; n >= 2; n--) {
             Locator source = frame().locator("#sortable li")
-                    .filter(new Locator.FilterOptions().setHasText("Item " + n))
+                    .filter(new Locator.FilterOptions().setHasText(ITEM_PREFIX + n))
                     .first();
             drag(source, first);
         }

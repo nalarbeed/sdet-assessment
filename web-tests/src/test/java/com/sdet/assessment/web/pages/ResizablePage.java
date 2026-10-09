@@ -15,7 +15,7 @@ public class ResizablePage {
     }
 
     private FrameLocator frame() {
-        return page.frameLocator("iframe.demo-frame");
+        return page.frameLocator(Locators.DEMO_FRAME);
     }
 
     public BoundingBox boxSize() {

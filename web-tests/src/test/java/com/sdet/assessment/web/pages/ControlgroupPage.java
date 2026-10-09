@@ -13,7 +13,7 @@ public class ControlgroupPage {
     }
 
     private FrameLocator frame() {
-        return page.frameLocator("iframe.demo-frame");
+        return page.frameLocator(Locators.DEMO_FRAME);
     }
 
     public void setHorizontal(String car, String transmission, String cars) {
