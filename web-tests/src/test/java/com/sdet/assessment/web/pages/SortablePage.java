@@ -21,7 +21,11 @@ public class SortablePage {
     }
 
     public List<String> items() {
-        return frame().locator("#sortable li").allInnerTexts();
+        Locator items = frame().locator("#sortable li");
+        // Web-first wait: wait for the list to be rendered before reading, so the
+        // original order is never captured as empty.
+        items.first().waitFor();
+        return items.allInnerTexts();
     }
 
     public void reverse() {

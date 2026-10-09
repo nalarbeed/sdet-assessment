@@ -151,15 +151,22 @@ public class WebSteps {
     public void iReverseTheSortableOrder() {
         sortablePage = new SortablePage(page);
         previousOrder = sortablePage.items();
-        log.info("Reversing sortable order from {}", previousOrder);
+        log.info("Sortable order before: {}", previousOrder);
         sortablePage.reverse();
+        log.info("Sortable order after: {}", sortablePage.items());
     }
 
     @Then("the sortable order is reversed")
     public void theSortableOrderIsReversed() {
+        Assert.assertNotNull(previousOrder, "Original sortable order was not captured");
+        Assert.assertFalse(previousOrder.isEmpty(), "Original sortable order is empty");
+        Assert.assertEquals(previousOrder.size(), 7, "Expected 7 sortable items before reversing");
         List<String> expected = new ArrayList<>(previousOrder);
         Collections.reverse(expected);
-        Assert.assertEquals(sortablePage.items(), expected, "Sortable order not reversed");
+        List<String> actual = sortablePage.items();
+        log.info("Expected reversed order: {}", expected);
+        log.info("Actual sortable order: {}", actual);
+        Assert.assertEquals(actual, expected, "Sortable order not reversed");
     }
 
     @When("I click {string} in the demo")
