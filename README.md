@@ -152,7 +152,7 @@ Or build a static report with `allure:report -pl <module>` and open `<module>/ta
 
 ## Known limitations
 
-- **Mobile is not run in CI** (it needs an emulator/Appium); only API and web run in GitHub Actions.
+- **Mobile tests are not part of the push/PR CI** (they need an emulator/Appium); they are available only via the manual, best-effort `Mobile CI (manual)` workflow.
 - Setup is **Windows-focused** for mobile (paths, `.cmd` wrapper).
 - Web tests target **Chromium only**.
 
@@ -164,3 +164,11 @@ Or build a static report with `allure:report -pl <module>` and open `<module>/ta
 - **`web-tests`** — installs Chromium with system dependencies via the Playwright CLI (`org.codehaus.mojo:exec-maven-plugin:3.6.4:java`, `mainClass=com.microsoft.playwright.CLI`, `args="install --with-deps chromium"`), then `./mvnw -B test -pl web-tests -Dcucumber.filter.tags=@web -Dheadless=true`.
 
 Both jobs upload `target/allure-results` as an artifact, attempt `allure:report`, and upload the generated report as a second artifact.
+
+`.github/workflows/mobile.yml` (`Mobile CI (manual)`) is **best-effort** and runs **only on `workflow_dispatch`** — never on push/PR. On `ubuntu-latest` it sets up Temurin JDK 17 and Node LTS, installs Appium + the UiAutomator2 driver, enables KVM (as the `reactivecircus/android-emulator-runner` docs describe), and boots an API 33 `google_apis` `x86_64` emulator via `ReactiveCircus/android-emulator-runner@v2`. Inside the emulator script it installs `build-tools;34.0.0` and exposes `aapt2`/`apksigner.jar` in `platform-tools` (Appium's search path), starts Appium in the background with `--allow-insecure=uiautomator2:chromedriver_autodownload`, waits for `http://127.0.0.1:4723/status` with a curl retry loop, then runs:
+
+```
+./mvnw -B test -pl mobile-api-tests "-Dcucumber.filter.tags=@mobile and not @fail-case" -Dappium.device.name=emulator-5554
+```
+
+It uploads `mobile-api-tests/target/allure-results` (`if: always()`). The `appium.device.name` override is not strictly required (UiAutomator2 targets the single connected emulator) but pins it to the runner's `emulator-5554`.
