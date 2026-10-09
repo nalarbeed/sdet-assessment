@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    name: API tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Run API tests
+        env:
+          REQRES_API_KEY: ${{ secrets.REQRES_API_KEY }}
+        run: ./mvnw -B test -pl mobile-api-tests -Dcucumber.filter.tags=@api
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: api-allure-results
+          path: mobile-api-tests/target/allure-results
+          if-no-files-found: ignore
+
+      - name: Generate Allure report
+        if: always()
+        continue-on-error: true
+        run: ./mvnw -B allure:report -pl mobile-api-tests
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: api-allure-report
+          path: mobile-api-tests/target/allure-report
+          if-no-files-found: ignore
+
+  web-tests:
+    name: Web tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Install Chromium with system dependencies
+        run: ./mvnw -B -pl web-tests org.codehaus.mojo:exec-maven-plugin:3.6.4:java -Dexec.classpathScope=test -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium"
+
+      - name: Run web tests
+        run: ./mvnw -B test -pl web-tests -Dcucumber.filter.tags=@web -Dheadless=true
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-allure-results
+          path: web-tests/target/allure-results
+          if-no-files-found: ignore
+
+      - name: Generate Allure report
+        if: always()
+        continue-on-error: true
+        run: ./mvnw -B allure:report -pl web-tests
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-allure-report
+          path: web-tests/target/allure-report
+          if-no-files-found: ignore
