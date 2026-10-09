@@ -8,7 +8,7 @@ on:
 jobs:
   mobile-tests:
     name: Mobile tests (emulator)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -44,35 +44,7 @@ jobs:
           target: google_apis
           arch: x86_64
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: |
-            set -e
-
-            # Appium needs aapt2/apksigner to read the APK manifest, but it looks
-            # for them in platform-tools (not build-tools/<ver>) on this setup, as
-            # observed locally. Install build-tools 34 and expose the binaries.
-            SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-            BT="$SDK/build-tools/34.0.0"
-            if [ ! -x "$BT/aapt2" ]; then
-              SDKMGR="$SDK/cmdline-tools/latest/bin/sdkmanager"
-              [ -x "$SDKMGR" ] || SDKMGR="sdkmanager"
-              yes | "$SDKMGR" --install "build-tools;34.0.0" >/dev/null 2>&1 || true
-            fi
-            if [ -x "$BT/aapt2" ]; then ln -sf "$BT/aapt2" "$SDK/platform-tools/aapt2"; fi
-            if [ -f "$BT/lib/apksigner.jar" ]; then ln -sf "$BT/lib/apksigner.jar" "$SDK/platform-tools/apksigner.jar"; fi
-
-            # Start Appium in the background with chromedriver auto-download enabled.
-            appium --allow-insecure=uiautomator2:chromedriver_autodownload > appium.log 2>&1 &
-
-            # Wait until Appium answers (curl retry loop, no sleep).
-            curl -sS --retry 60 --retry-connrefused --retry-delay 0 --retry-all-errors \
-              http://127.0.0.1:4723/status
-            echo
-
-            # UiAutomator2 targets the single connected emulator; the runner uses
-            # port 5554, so pin the device name to that udid for the CI emulator.
-            ./mvnw -B test -pl mobile-api-tests \
-              "-Dcucumber.filter.tags=@mobile and not @fail-case" \
-              -Dappium.device.name=emulator-5554
+          script: bash .github/scripts/run-mobile-tests.sh
 
       - name: Upload Allure results
         if: always()
