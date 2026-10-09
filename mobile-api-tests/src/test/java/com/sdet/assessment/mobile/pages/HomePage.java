@@ -83,6 +83,11 @@ public class HomePage extends BasePage {
         click(START_REGISTRATION);
     }
 
+    /** The Chrome-logo icon button (left-hand ImageButton) that opens the WebView demo. */
+    public void tapChromeLogo() {
+        click(START_WEBVIEW);
+    }
+
     public void typeIntoExceptionField(String text) {
         try {
             WebElement field = wait.until(ExpectedConditions.visibilityOfElementLocated(EXCEPTION_FIELD));

@@ -51,6 +51,13 @@ public class MobileHooks {
         AndroidDriver driver = AppiumDriverManager.get();
         if (driver != null) {
             try {
+                // A webview scenario may still be in a WEBVIEW_ context; return
+                // to the native context so screenshots/cleanup are reliable.
+                driver.context("NATIVE_APP");
+            } catch (Exception e) {
+                log.debug("Could not switch to NATIVE_APP: {}", e.getMessage());
+            }
+            try {
                 // The app may have crashed; still try to capture whatever is on
                 // screen (e.g. the crash dialog) as evidence.
                 byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);

@@ -33,6 +33,7 @@ public final class AppiumDriverManager {
         options.setCapability("appium:newCommandTimeout", 120);
         options.setCapability("appium:noReset", true);
         options.setCapability("appium:autoLaunch", false);
+        options.setCapability("appium:chromedriverAutodownload", true);
 
         log.info("Starting AndroidDriver (device={}, app={})", deviceName, apkPath);
         try {

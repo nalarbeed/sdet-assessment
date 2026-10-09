@@ -7,6 +7,7 @@ import com.sdet.assessment.mobile.pages.PopupWindowPage;
 import com.sdet.assessment.mobile.pages.RegisterUserPage;
 import com.sdet.assessment.mobile.pages.ToastPage;
 import com.sdet.assessment.mobile.pages.VerifyUserPage;
+import com.sdet.assessment.mobile.pages.WebViewPage;
 import io.appium.java_client.android.AndroidDriver;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
@@ -27,6 +28,7 @@ public class MobileSteps {
     private PopupWindowPage popupWindowPage;
     private RegisterUserPage registerUserPage;
     private VerifyUserPage verifyUserPage;
+    private WebViewPage webViewPage;
 
     private AndroidDriver driver() {
         return AppiumDriverManager.get();
@@ -51,6 +53,13 @@ public class MobileSteps {
             verifyUserPage = new VerifyUserPage(driver());
         }
         return verifyUserPage;
+    }
+
+    private WebViewPage webView() {
+        if (webViewPage == null) {
+            webViewPage = new WebViewPage(driver());
+        }
+        return webViewPage;
     }
 
     @Given("I am on the home screen")
@@ -214,5 +223,75 @@ public class MobileSteps {
     public void theHomeScreenTitleIsDisplayed() {
         Assert.assertTrue(home().isLoaded(), "Home screen is not displayed (the app likely crashed)");
         Assert.assertEquals(home().title(), "selendroid-test-app", "Unexpected home screen title");
+    }
+
+    @When("I tap the Chrome logo button")
+    public void iTapTheChromeLogoButton() {
+        log.info("Tapping the Chrome logo button");
+        home().tapChromeLogo();
+    }
+
+    @When("I switch to the web view")
+    public void iSwitchToTheWebView() {
+        log.info("Switching to the web view context");
+        webView().switchToWebView();
+    }
+
+    @When("I switch back to the native view")
+    public void iSwitchBackToTheNativeView() {
+        log.info("Switching back to the native context");
+        webView().switchToNative();
+    }
+
+    @Then("the web view title is {string}")
+    public void theWebViewTitleIs(String expected) {
+        Assert.assertEquals(webView().title(), expected, "Unexpected web view title");
+    }
+
+    @Then("the web view shows text starting with {string}")
+    public void theWebViewShowsTextStartingWith(String prefix) {
+        Assert.assertTrue(webView().bodyText().startsWith(prefix),
+                "Web view text does not start with: " + prefix + " (was: " + webView().bodyText() + ")");
+    }
+
+    @When("I enter the name {string} in the web view")
+    public void iEnterTheNameInTheWebView(String name) {
+        log.info("Entering name '{}' in the web view", name);
+        webView().enterName(name);
+    }
+
+    @When("I select the Preferred Car {string}")
+    public void iSelectThePreferredCar(String car) {
+        log.info("Selecting preferred car '{}'", car);
+        webView().selectCar(car);
+    }
+
+    @When("I tap {string} in the web view")
+    public void iTapInTheWebView(String button) {
+        log.info("Submitting the web view form ('{}')", button);
+        webView().submit();
+    }
+
+    @Then("the web view shows the name {string}")
+    public void theWebViewShowsTheName(String name) {
+        Assert.assertTrue(webView().bodyText().contains(name),
+                "Web view does not show the name: " + name);
+    }
+
+    @Then("the web view shows the preferred car {string}")
+    public void theWebViewShowsThePreferredCar(String car) {
+        Assert.assertTrue(webView().bodyText().toLowerCase().contains(car.toLowerCase()),
+                "Web view does not show the preferred car: " + car);
+    }
+
+    @When("I click the {string} link")
+    public void iClickTheLink(String linkText) {
+        log.info("Clicking the '{}' link in the web view", linkText);
+        webView().clickLink(linkText);
+    }
+
+    @Then("the default Preferred Car is {string}")
+    public void theDefaultPreferredCarIs(String expected) {
+        Assert.assertEquals(webView().defaultCar(), expected, "Unexpected default preferred car");
     }
 }

@@ -36,6 +36,23 @@ Feature: Selendroid test app mobile scenarios
     When I dismiss the popup window
     Then the popup window is gone
 
+  @s3
+  Scenario: S3 Web view interaction - Say Hello
+    Given I am on the home screen
+    When I tap the Chrome logo button
+    And I switch to the web view
+    Then the web view title is "Say Hello Demo"
+    And the web view shows text starting with "Hello, can you"
+    When I enter the name "Homer Simpson" in the web view
+    And I select the Preferred Car "Mercedes"
+    And I tap "Send me your name!" in the web view
+    Then the web view shows text starting with "This is my"
+    And the web view shows the name "Homer Simpson"
+    And the web view shows the preferred car "Mercedes"
+    When I click the "here" link
+    Then the default Preferred Car is "Volvo"
+    And I switch back to the native view
+
   @s5
   Scenario: S5 Show progress bar then verify the registration screen
     Given I am on the home screen
