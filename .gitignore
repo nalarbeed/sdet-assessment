@@ -1,0 +1,9 @@
+target/
+.idea/
+*.iml
+allure-results/
+allure-report/
+logs/
+screenshots/
+.env
+node_modules/
