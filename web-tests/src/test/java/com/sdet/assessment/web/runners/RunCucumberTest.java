@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 
 @CucumberOptions(
         features = "classpath:features",
-        glue = "com.sdet.assessment.web.steps",
+        glue = {"com.sdet.assessment.web.steps", "com.sdet.assessment.web.hooks"},
         plugin = {
                 "pretty",
                 "io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"
