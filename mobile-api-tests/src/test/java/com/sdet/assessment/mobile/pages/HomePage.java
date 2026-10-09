@@ -2,7 +2,13 @@ package com.sdet.assessment.mobile.pages;
 
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,6 +23,7 @@ public class HomePage extends BasePage {
     private static final By START_REGISTRATION = By.id(PKG + ":id/startUserRegistration");
     private static final By TEXT_FIELD = By.id(PKG + ":id/my_text_field");
     private static final By WAITING_BUTTON = By.id(PKG + ":id/waitingButtonTest");
+    private static final By PROGRESS = By.id("android:id/progress");
     private static final By ACCEPT_ADDS = By.id(PKG + ":id/input_adds_check_box");
     private static final By VISIBLE_BUTTON = By.id(PKG + ":id/visibleButtonTest");
     private static final By TOAST_BUTTON = By.id(PKG + ":id/showToastButton");
@@ -69,5 +76,32 @@ public class HomePage extends BasePage {
             throw new IllegalArgumentException("Unknown home element: " + element);
         }
         click(by);
+    }
+
+    /** The file-logo icon button (right-hand ImageButton) that opens registration. */
+    public void tapFileLogo() {
+        click(START_REGISTRATION);
+    }
+
+    public void typeIntoExceptionField(String text) {
+        try {
+            WebElement field = wait.until(ExpectedConditions.visibilityOfElementLocated(EXCEPTION_FIELD));
+            field.click();
+            field.sendKeys(text);
+        } catch (WebDriverException e) {
+            // Expected in the S9 fail case: typing this text crashes the app and
+            // the field goes stale. The scenario's real assertion (home title)
+            // still runs and fails afterwards.
+        }
+    }
+
+    public void waitForProgressLoaderToDisappear() {
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .until(ExpectedConditions.visibilityOfElementLocated(PROGRESS));
+        } catch (TimeoutException e) {
+            // Loader may have already finished; fall through to invisibility wait.
+        }
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(PROGRESS));
     }
 }

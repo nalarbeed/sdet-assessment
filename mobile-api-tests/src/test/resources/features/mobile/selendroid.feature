@@ -35,3 +35,69 @@ Feature: Selendroid test app mobile scenarios
     Then the popup window is displayed
     When I dismiss the popup window
     Then the popup window is gone
+
+  @s5
+  Scenario: S5 Show progress bar then verify the registration screen
+    Given I am on the home screen
+    When I tap the "Show Progress Bar for a while" button
+    And I wait for the progress loader to disappear
+    Then the registration screen title is "selendroid-test-app"
+    And the registration screen shows text starting with "Welcome to register"
+    And the registration screen shows these elements
+      | Username             |
+      | E-Mail               |
+      | Password             |
+      | Name                 |
+      | Programming Language |
+      | I accept adds        |
+      | Register User        |
+
+  @s4
+  Scenario: S4 Register a new user from the file logo button
+    Given I am on the home screen
+    When I tap the file logo button
+    Then the registration screen title is "selendroid-test-app"
+    And the registration screen shows text starting with "Welcome to register"
+    And the registration screen shows these elements
+      | Username             |
+      | E-Mail               |
+      | Password             |
+      | Name                 |
+      | Programming Language |
+      | I accept adds        |
+      | Register User        |
+    And the Name field is "Mr. Burns"
+    And the default Programming Language is "Ruby"
+    When I fill the registration form with:
+      | Field    | Value                |
+      | Username | tester01             |
+      | E-Mail   | tester01@example.com |
+      | Password | secret               |
+      | Name     | Homer Simpson        |
+    And I select the Programming Language "Java"
+    And I accept adds
+    And I tap Register User
+    Then the verify screen shows the registered user with:
+      | Field                | Value                |
+      | Name                 | Homer Simpson        |
+      | Username             | tester01             |
+      | Password             | secret               |
+      | E-Mail               | tester01@example.com |
+      | Programming Language | Java                 |
+      | I accept adds        | true                 |
+    When I tap Register User again
+    Then the home screen is displayed
+
+  @s8
+  @fail-case
+  Scenario: S8 Press to throw unhandled exception
+    Given I am on the home screen
+    When I tap the "Press to throw unhandled exception" button
+    Then the home screen title is displayed
+
+  @s9
+  @fail-case
+  Scenario: S9 Type to throw unhandled exception
+    Given I am on the home screen
+    When I type "test" in the exception field
+    Then the home screen title is displayed

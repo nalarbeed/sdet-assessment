@@ -4,7 +4,9 @@ import com.sdet.assessment.mobile.driver.AppiumDriverManager;
 import com.sdet.assessment.mobile.pages.HomePage;
 import com.sdet.assessment.mobile.pages.LocalizationPage;
 import com.sdet.assessment.mobile.pages.PopupWindowPage;
+import com.sdet.assessment.mobile.pages.RegisterUserPage;
 import com.sdet.assessment.mobile.pages.ToastPage;
+import com.sdet.assessment.mobile.pages.VerifyUserPage;
 import io.appium.java_client.android.AndroidDriver;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
@@ -14,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
+import java.util.Map;
+
 public class MobileSteps {
 
     private static final Logger log = LoggerFactory.getLogger(MobileSteps.class);
@@ -21,6 +25,8 @@ public class MobileSteps {
     private HomePage homePage;
     private LocalizationPage localizationPage;
     private PopupWindowPage popupWindowPage;
+    private RegisterUserPage registerUserPage;
+    private VerifyUserPage verifyUserPage;
 
     private AndroidDriver driver() {
         return AppiumDriverManager.get();
@@ -31,6 +37,20 @@ public class MobileSteps {
             homePage = new HomePage(driver());
         }
         return homePage;
+    }
+
+    private RegisterUserPage register() {
+        if (registerUserPage == null) {
+            registerUserPage = new RegisterUserPage(driver());
+        }
+        return registerUserPage;
+    }
+
+    private VerifyUserPage verify() {
+        if (verifyUserPage == null) {
+            verifyUserPage = new VerifyUserPage(driver());
+        }
+        return verifyUserPage;
     }
 
     @Given("I am on the home screen")
@@ -54,6 +74,18 @@ public class MobileSteps {
     public void iTapTheButton(String button) {
         log.info("Tapping '{}'", button);
         home().tap(button);
+    }
+
+    @When("I tap the file logo button")
+    public void iTapTheFileLogoButton() {
+        log.info("Tapping the file logo button");
+        home().tapFileLogo();
+    }
+
+    @When("I wait for the progress loader to disappear")
+    public void iWaitForTheProgressLoaderToDisappear() {
+        log.info("Waiting for the progress loader to disappear");
+        home().waitForProgressLoaderToDisappear();
     }
 
     @Then("the localization dialog shows message {string}")
@@ -96,5 +128,91 @@ public class MobileSteps {
     @Then("the popup window is gone")
     public void thePopupWindowIsGone() {
         Assert.assertTrue(popupWindowPage.isDismissed(), "Popup window is still displayed");
+    }
+
+    @Then("the registration screen title is {string}")
+    public void theRegistrationScreenTitleIs(String expected) {
+        Assert.assertEquals(register().title(), expected, "Unexpected registration screen title");
+    }
+
+    @Then("the registration screen shows text starting with {string}")
+    public void theRegistrationScreenShowsTextStartingWith(String prefix) {
+        Assert.assertTrue(register().showsTextStartingWith(prefix),
+                "Registration screen text does not start with: " + prefix);
+    }
+
+    @Then("the registration screen shows these elements")
+    public void theRegistrationScreenShowsTheseElements(DataTable table) {
+        for (String element : table.asList()) {
+            Assert.assertTrue(register().isElementDisplayed(element),
+                    "Registration element not displayed: " + element);
+        }
+    }
+
+    @Then("the Name field is {string}")
+    public void theNameFieldIs(String expected) {
+        Assert.assertEquals(register().name(), expected, "Unexpected Name value");
+    }
+
+    @Then("the default Programming Language is {string}")
+    public void theDefaultProgrammingLanguageIs(String expected) {
+        Assert.assertEquals(register().language(), expected, "Unexpected default programming language");
+    }
+
+    @When("I fill the registration form with:")
+    public void iFillTheRegistrationFormWith(DataTable table) {
+        for (Map<String, String> row : table.asMaps(String.class, String.class)) {
+            String field = row.get("Field");
+            String value = row.get("Value");
+            log.info("Filling registration field '{}'", field);
+            register().fillField(field, value);
+        }
+    }
+
+    @When("I select the Programming Language {string}")
+    public void iSelectTheProgrammingLanguage(String language) {
+        log.info("Selecting programming language '{}'", language);
+        register().selectLanguage(language);
+    }
+
+    @When("I accept adds")
+    public void iAcceptAdds() {
+        log.info("Accepting adds on the registration screen");
+        register().acceptAdds();
+    }
+
+    @When("I tap Register User")
+    public void iTapRegisterUser() {
+        log.info("Tapping Register User (registration screen)");
+        register().register();
+    }
+
+    @Then("the verify screen shows the registered user with:")
+    public void theVerifyScreenShowsTheRegisteredUserWith(DataTable table) {
+        Assert.assertTrue(verify().isDisplayed(), "Verify user screen is not displayed");
+        for (Map<String, String> row : table.asMaps(String.class, String.class)) {
+            String field = row.get("Field");
+            String expected = row.get("Value");
+            Assert.assertEquals(verify().valueOf(field), expected,
+                    "Unexpected value for '" + field + "'");
+        }
+    }
+
+    @When("I tap Register User again")
+    public void iTapRegisterUserAgain() {
+        log.info("Tapping Register User (verify screen)");
+        verify().register();
+    }
+
+    @When("I type {string} in the exception field")
+    public void iTypeInTheExceptionField(String text) {
+        log.info("Typing '{}' in the type-to-throw-unhandled-exception field", text);
+        home().typeIntoExceptionField(text);
+    }
+
+    @Then("the home screen title is displayed")
+    public void theHomeScreenTitleIsDisplayed() {
+        Assert.assertTrue(home().isLoaded(), "Home screen is not displayed (the app likely crashed)");
+        Assert.assertEquals(home().title(), "selendroid-test-app", "Unexpected home screen title");
     }
 }

@@ -24,19 +24,20 @@ public class MobileHooks {
     private static final Logger log = LoggerFactory.getLogger(MobileHooks.class);
 
     private static final String APP_PACKAGE = "io.selendroid.testapp";
-    private static final String APP_ACTIVITY = "io.selendroid.testapp.HomeScreenActivity";
 
     private static final By HOME = By.id(APP_PACKAGE + ":id/buttonTest");
     private static final By REVIEW_CONTINUE =
             By.id("com.android.permissioncontroller:id/continue_button");
     private static final By DEPRECATED_OK = By.id("android:id/button1");
+    private static final By CRASH_CLOSE = By.id("android:id/aerr_close");
+    private static final By CRASH_APP_INFO = By.id("android:id/aerr_app_info");
 
     @Before("@mobile")
     public void setUp() {
         AppiumDriverManager.start();
         AndroidDriver driver = AppiumDriverManager.get();
         enableMultiWindowAccess(driver);
-        launchApp(driver);
+        restartApp(driver);
         dismissSystemDialogs(driver);
 
         int timeout = Integer.parseInt(ConfigReader.get("appium.wait.timeout"));
@@ -50,6 +51,8 @@ public class MobileHooks {
         AndroidDriver driver = AppiumDriverManager.get();
         if (driver != null) {
             try {
+                // The app may have crashed; still try to capture whatever is on
+                // screen (e.g. the crash dialog) as evidence.
                 byte[] screenshot = driver.getScreenshotAs(OutputType.BYTES);
                 Allure.attachment("Screenshot", "image/png",
                         new ByteArrayInputStream(screenshot),
@@ -58,7 +61,11 @@ public class MobileHooks {
                 log.warn("Could not capture screenshot: {}", e.getMessage());
             }
         }
-        AppiumDriverManager.quit();
+        try {
+            AppiumDriverManager.quit();
+        } catch (Exception e) {
+            log.warn("Error while quitting driver: {}", e.getMessage());
+        }
     }
 
     private void enableMultiWindowAccess(AndroidDriver driver) {
@@ -67,21 +74,36 @@ public class MobileHooks {
         driver.setSetting("limitXPathContextScope", false);
     }
 
-    private void launchApp(AndroidDriver driver) {
+    /**
+     * Always start a scenario from a fresh home screen, even if the previous
+     * scenario crashed the app. Terminating first guarantees the launcher
+     * activity is (re)started rather than resuming a dead/odd activity.
+     */
+    private void restartApp(AndroidDriver driver) {
+        try {
+            driver.terminateApp(APP_PACKAGE);
+        } catch (Exception e) {
+            log.debug("terminateApp ignored: {}", e.getMessage());
+        }
         driver.activateApp(APP_PACKAGE);
         log.info("Launched {}", APP_PACKAGE);
     }
 
     private void dismissSystemDialogs(AndroidDriver driver) {
-        // This legacy app triggers two blocking system dialogs on launch:
+        // This legacy app triggers blocking system dialogs on launch:
         //  - the permission-review dialog ("Choose what to allow ...")
         //  - the "This app was built for an older version of Android" warning
-        // Dismiss each only if it actually appears.
+        // A previous failing scenario may also have left a crash dialog on
+        // screen. Dismiss each only if it actually appears.
         dismissIfPresent(driver, REVIEW_CONTINUE, "permission review");
         dismissIfPresent(driver, DEPRECATED_OK, "older-version warning");
+        dismissIfPresent(driver, CRASH_CLOSE, "app crash");
+        dismissIfPresent(driver, CRASH_APP_INFO, "app crash info");
+
         if (!isHomeVisible(driver)) {
             dismissIfPresent(driver, REVIEW_CONTINUE, "permission review");
             dismissIfPresent(driver, DEPRECATED_OK, "older-version warning");
+            dismissIfPresent(driver, CRASH_CLOSE, "app crash");
         }
     }
 
